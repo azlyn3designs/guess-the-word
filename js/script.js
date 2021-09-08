@@ -75,11 +75,11 @@ const validateInput = function(input) {
 
     //checks player's input for empty input, more than one letter, or a character
     if(input === "") {
-        msg.innerText = "Please enter a letter, ex: f"; //entered empty value
+        msg.innerText = "Please enter a letter. For example: f"; //entered empty value
     } else if(!input.match(acceptedLetter)) {
-        msg.innerText = "Please enter only an alphabetical letter, ex: g"; //entered num, symbol, or mixed value other than a letter
+        msg.innerText = "Please enter only an alphabetical letter from A to Z. For example: g"; //entered num, symbol, or mixed value other than a letter
     } else if(input.length > 1) {
-        msg.innerText = "Please enter a single letter only from A to Z, ext: h"; //entered more than a single letter
+        msg.innerText = "Please enter a single letter only. For example: h"; //entered more than a single letter
     } else {
         return input;
     }
@@ -95,6 +95,53 @@ const makeGuess = function(guess) {
         msg.innerText = "Sorry, but you have aready guessed this letter. Please try again."; //returns true, displays try again msg
     } else {
         guessedLetters.push(guess); // returns false, adds letter to end of guessedLetters Array
-        console.log(guessedLetters); //shows letters added to Array
+        //console.log(guessedLetters); //shows letters added to Array
+        
+        showGuessedLetters(); //calls function to display 1st time letter guesses
+        updateWordInProgress(guessedLetters); //calls function that displays the letters in the specified hidden word
+    }
+};
+
+//function Displays Guessed Letters
+const showGuessedLetters = function() {
+    guessedLettersElement.innerHTML = ""; //clears unordered list element
+    
+    for(const showLetters of guessedLetters) {
+        const li = document.createElement("li"); //creates list item element
+        li.innerHTML = showLetters; //adds letter to HTML page
+        guessedLettersElement.append(li); //adds letter to end of unordered list
+    }
+};
+
+//funciton replaces circular symbols with correct letters guessed for the word
+const updateWordInProgress = function(guessedLetters) {
+    const wordUpper = word.toUpperCase(); //changes word variable to uppercase
+    const wordArray = wordUpper.split(""); //returns entire string
+    
+    const displayWord = []; //empty Array for displaying correct letters in word
+
+    console.log(displayWord); //test if letters display & display correctly in array
+
+    for(const letter of wordArray) {
+        //checks if guessedLetters contain the same letter found in display word
+        if(guessedLetters.includes(letter)) {
+            displayWord.push(letter.toUpperCase()); //adds letter to end of displayWord Array
+        } else {
+            displayWord.push("●"); //adds symbol to the end of array
+        }
+    }
+
+    wordInProgress.innerText = displayWord.join(""); //converts & returns array elements as a string
+    playerWinsCheck(); //calls function to check if Player won
+};
+
+//function checks if Player WINS Game
+const playerWinsCheck = function() {
+
+    /* searches wordInProgress's innerText string to see if the uppercase test word matches.
+    Statement doesn't work if you use "this.wordUpper". */
+    if(wordInProgress.innerText === word.toUpperCase()) {
+        msg.classList.add(".win"); //add win class to para message class
+        msg.innerHTML = '<p class="highlight">You guessed the correct word! Congrats!</p>'; //changes para to CSS highlight class selector
     }
 };
