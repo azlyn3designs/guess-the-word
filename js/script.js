@@ -8,7 +8,7 @@ const playersInput = document.querySelector(".letter");
 //empty para where word in progress appears
 const wordInProgress = document.querySelector(".word-in-progress");
 //para where remaining guesses will appear
-const remainingGuesses = document.querySelector(".remaining");
+const remainingGuessesElement = document.querySelector(".remaining");
 //para <span> element displays num of remaining guesses
 const numOfGuesses = document.querySelector(".remaining span");
 //empty para where msg appears when player guesses a letter
@@ -18,9 +18,34 @@ const playAgainButton = document.querySelector(".play-again");
 
 
 //test variable & value for word game 
-const word = "magnolia";
+let word = "magnolia";
 //empty Array to contain all the letters the player guesses
 const guessedLetters = [];
+/* constrains variable to updateRemainingGuesses function 
+block, variable not accessable to outside the block */
+let remainingGuesses = 8;
+
+
+//async function used to fetch data (823 words) from a text file
+const getWord = async function() {
+    const res = await fetch("https://gist.githubusercontent.com/skillcrush-curriculum/7061f1d4d3d5bfe47efbfbcfe42bf57e/raw/5ffc447694486e7dea686f34a6c085ae371b43fe/words.txt")
+    const words = await res.text();
+    //console.log(word);
+
+    /* to select a word, split the word from the fetched text file into an Array, 
+    then use a delimiter w/newlines represented by "\n" to separate words */
+    const wordArray = words.split("\n");
+    console.log(wordArray); //logs out the wordArray
+    
+    //grabs a random word from its index (rounds down to whole #) from the text file's word Array
+    const randomWordIndex = Math.floor(Math.random() * wordArray.length);
+
+    //selects a random word from Array by its index & removes any extra whitespace
+    word = wordArray[randomWordIndex].trim();
+    placeholder(word); //calls function to return placeholders for each letter - moved from global space
+};
+
+//getWord(); //calls function to start game
 
 
 // displays placeholder symbol for each letter in a specified word
@@ -38,7 +63,8 @@ const placeholder = function(word) {
     wordInProgress.innerText = placeholderLetters.join(""); 
 };
 
-placeholder(word); //returns placeholders for each letter
+//placeholder(word); //returns placeholders for each letter - moved
+getWord(); //calls function to start game
 
 
 //guessButton Event Listener on click w/event parameter to submit player's letter guess
@@ -98,6 +124,7 @@ const makeGuess = function(guess) {
         //console.log(guessedLetters); //shows letters added to Array
         
         showGuessedLetters(); //calls function to display 1st time letter guesses
+        updateRemainingGuesses(guess); //calls function that counts & monitors player's remaining guesses
         updateWordInProgress(guessedLetters); //calls function that displays the letters in the specified hidden word
     }
 };
@@ -135,9 +162,31 @@ const updateWordInProgress = function(guessedLetters) {
     playerWinsCheck(); //calls function to check if Player won
 };
 
+//function counts & monitors player's remaining guesses
+const updateRemainingGuesses = function(guess) {
+    const uppercaseWord = word.toUpperCase();
+
+    //checks to see if word contains guessedLetters
+    if(uppercaseWord.includes(guess)) {
+        msg.innerText = `Good guess! The word has the letter ${guess}`;
+    } else {
+        msg.innerText = `Mmm...sorry, the word doesn't contain the letter ${guess}`;
+        remainingGuesses -= 1;
+    }
+    
+    //displays the num of guesses the player has left
+    if(remainingGuesses === 0) {
+        msg.innerHTML = `Sorry, but you have no remaining guesses. The word was <span class="highlight">${word}</span>. Game Over.`;
+        numOfGuesses.innerText = `${remainingGuesses} guesses`;
+    } else if(remainingGuesses === 1) {
+        numOfGuesses.innerText = `${remainingGuesses} guess`;
+    } else {
+        numOfGuesses.innerText = `${remainingGuesses} guesses`;
+    }
+};
+
 //function checks if Player WINS Game
 const playerWinsCheck = function() {
-
     /* searches wordInProgress's innerText string to see if the uppercase test word matches.
     Statement doesn't work if you use "this.wordUpper". */
     if(wordInProgress.innerText === word.toUpperCase()) {
